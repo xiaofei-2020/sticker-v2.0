@@ -11,6 +11,7 @@ const ffmpeg = createFFmpeg({ log: true });
 
 <template>
   <h1>hello</h1>
+  <el-button>Default</el-button>
 </template>
 
 <style scoped></style>
