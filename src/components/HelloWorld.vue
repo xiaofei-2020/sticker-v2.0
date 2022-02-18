@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
 import { UploadFilled } from "@element-plus/icons-vue";
-
+import { ref } from "vue";
 type fileInfo = {
+  filename: string;
   width: number;
   height: number;
   fps: number;
@@ -10,13 +11,19 @@ type fileInfo = {
 
 const noop = () => {};
 const ffmpeg = createFFmpeg();
+let imgSrc = ref("");
+
 async function handleUploadGif({ raw }: { raw: File }) {
   const fileInfo = await getFileInfo(raw);
-  console.log(fileInfo);
+  const blobUrlArr = await getGifFrames(raw);
+  imgSrc.value = blobUrlArr[0] || "";
+  console.log(imgSrc);
+  ffmpeg.exit();
 }
 async function getFileInfo(file: File): Promise<fileInfo> {
   const { name: filename } = file;
   const fileInfo = {
+    filename,
     width: 0,
     height: 0,
     fps: 0,
@@ -39,6 +46,28 @@ async function getFileInfo(file: File): Promise<fileInfo> {
   ffmpeg.setLogger(noop);
   return fileInfo;
 }
+async function getGifFrames(file: File): Promise<string[]> {
+  const { name: filename } = file;
+  const base64Arr: string[] = [];
+  if (!ffmpeg.isLoaded()) {
+    await ffmpeg.load();
+  }
+  ffmpeg.FS("writeFile", filename, await fetchFile(file));
+  await ffmpeg.run("-i", filename, `${filename.slice(0, -4)}image%d.png`);
+  let i = 0;
+  while (++i) {
+    try {
+      const data = ffmpeg.FS(
+        "readFile",
+        `${filename.slice(0, -4)}image${i}.png`
+      );
+      base64Arr.push(URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' })));
+    } catch (e) {
+      break;
+    }
+  }
+  return base64Arr;
+}
 </script>
 
 <template>
@@ -59,6 +88,7 @@ async function getFileInfo(file: File): Promise<fileInfo> {
       <div class="el-upload__tip">gif files with a size less than 10mb</div>
     </template>
   </el-upload>
+  <img :src="imgSrc" alt="加载中" />
 </template>
 
 <style scoped></style>

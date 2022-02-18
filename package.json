@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@ffmpeg/core": "^0.10.0",
-    "@ffmpeg/ffmpeg": "^0.10.1",
+    "@ffmpeg/ffmpeg": "git+ssh://git@gitee.com:xiaofei1996/ffmpeg.wasm.git",
     "element-plus": "^2.0.2",
     "vue": "^3.2.25"
   },
