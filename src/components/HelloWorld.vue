@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
 import { UploadFilled } from "@element-plus/icons-vue";
-import { ref } from "vue";
+import { reactive, ref } from "vue";
 type fileInfo = {
   filename: string;
   width: number;
@@ -11,12 +11,16 @@ type fileInfo = {
 
 const noop = () => {};
 const ffmpeg = createFFmpeg();
+let blobUrlArr: string[] = [];
 let imgSrc = ref("");
+let sliderMax = ref(10);
+let imgSrcIndex = ref(1);
 
 async function handleUploadGif({ raw }: { raw: File }) {
   const fileInfo = await getFileInfo(raw);
-  const blobUrlArr = await getGifFrames(raw);
+  blobUrlArr = await getGifFrames(raw);
   imgSrc.value = blobUrlArr[0] || "";
+  sliderMax.value = blobUrlArr.length - 1;
   console.log(imgSrc);
   ffmpeg.exit();
 }
@@ -61,12 +65,17 @@ async function getGifFrames(file: File): Promise<string[]> {
         "readFile",
         `${filename.slice(0, -4)}image${i}.png`
       );
-      base64Arr.push(URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' })));
+      base64Arr.push(
+        URL.createObjectURL(new Blob([data.buffer], { type: "video/mp4" }))
+      );
     } catch (e) {
       break;
     }
   }
   return base64Arr;
+}
+function handleSliderChange(val: number): void {
+  imgSrc.value = blobUrlArr[val];
 }
 </script>
 
@@ -89,6 +98,12 @@ async function getGifFrames(file: File): Promise<string[]> {
     </template>
   </el-upload>
   <img :src="imgSrc" alt="加载中" />
+  <el-slider
+    v-model="imgSrcIndex"
+    @change="handleSliderChange"
+    :min="1"
+    :max="sliderMax"
+  ></el-slider>
 </template>
 
 <style scoped></style>
