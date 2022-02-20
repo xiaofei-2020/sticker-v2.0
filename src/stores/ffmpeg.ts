@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+import { defineStore } from "pinia";
 import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
 
 type fileInfo = {
@@ -10,11 +10,11 @@ type fileInfo = {
 const noop = () => {};
 
 const ffmpeg = createFFmpeg();
-export const useFFmpeg = defineStore('ffmpeg', {
+export const useFFmpeg = defineStore("ffmpeg", {
   state: () => {
-    return { 
+    return {
       //
-    }
+    };
   },
   actions: {
     exit() {
@@ -36,7 +36,7 @@ export const useFFmpeg = defineStore('ffmpeg', {
       ffmpeg.FS("writeFile", filename, await fetchFile(file));
       ffmpeg.setLogger(({ type, message }) => {
         const infoReg =
-          /Stream #0:0: Video: gif, .*, (\d*)x(\d*), (\d*\.*\d*) fps, .*/;
+          /Stream #0:0: Video: gif, .*, (\d*)x(\d*).*, (\d*\.*\d*) fps, .*/;
         const s = message.match(infoReg);
         if (s !== null) {
           if (s[1] !== undefined) fileInfo.width = Number(s[1]);
@@ -71,6 +71,6 @@ export const useFFmpeg = defineStore('ffmpeg', {
         }
       }
       return base64Arr;
-    }
+    },
   },
-})
+});
