@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
 import { UploadFilled } from "@element-plus/icons-vue";
-import { reactive, ref } from "vue";
+import { reactive, ref, onMounted } from "vue";
 import { useFFmpeg } from "../stores/ffmpeg";
 import { useCanvas } from "../stores/canvas";
 
@@ -15,6 +14,23 @@ let imgSrcIndex = ref(1);
 let gifText = ref("");
 let fileInfoObj: fileInfo;
 
+// hooks
+onMounted(() => {
+  ffmpegStore.load();
+})
+
+// Utils
+function createImgEl(url: string): Promise<HTMLImageElement> {
+  return new Promise((res, rej) => {
+    let imgEl = document.createElement("img");
+    imgEl.src = url;
+    imgEl.onload = () => {
+      res(imgEl);
+    };
+  });
+}
+
+// 事件区
 async function handleUploadGif({ raw }: { raw: File }) {
   fileInfoObj = await ffmpegStore.getFileInfo(raw);
   blobUrlArr = await ffmpegStore.getGifFrames(raw);
@@ -37,35 +53,9 @@ async function handleGenerate() {
     );
   }
   imgSrc.value = base64Arr[base64Arr.length - 1];
+  console.log('generated!');
 }
 
-function createImgEl(url: string): Promise<HTMLImageElement> {
-  return new Promise((res, rej) => {
-    let imgEl = document.createElement("img");
-    imgEl.src = url;
-    imgEl.onload = () => {
-      res(imgEl);
-    };
-  });
-}
-async function generateGif(
-  urlList: string[],
-  text: string,
-  fileInfo: fileInfo
-): Promise<string[]> {
-  let img: HTMLImageElement;
-  let canvas: HTMLCanvasElement = document.createElement("canvas");
-  canvas.width = fileInfo.width;
-  canvas.height = fileInfo.height;
-  let ctx: CanvasRenderingContext2D = canvas.getContext("2d")!;
-  const base64Arr: string[] = [];
-  for (let url of urlList) {
-    img = await createImgEl(url);
-    ctx.drawImage(img, 0, 0);
-    base64Arr.push(canvas.toDataURL());
-  }
-  return base64Arr;
-}
 </script>
 
 <template>

@@ -16,6 +16,12 @@ export const useFFmpeg = defineStore("ffmpeg", {
         ffmpeg.exit();
       }
     },
+    async load() {
+      if (!ffmpeg.isLoaded()) {
+        await ffmpeg.load();
+        console.log('ffmpeg loaded');
+      }
+    },
     async getFileInfo(file: File): Promise<fileInfo> {
       const { name: filename } = file;
       const fileInfo = {

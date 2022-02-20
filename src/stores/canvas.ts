@@ -23,6 +23,10 @@ export const useCanvas = defineStore("canvas", {
       canvas.width = imgWidth;
       canvas.height = imgHeight;
       ctx.drawImage(imgEl, 0, 0);
+
+      ctx.font="20px Georgia";
+      ctx.fillText("Hello World!",10,50);
+
       return canvas.toDataURL();
     },
   },
