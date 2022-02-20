@@ -23,9 +23,16 @@ export const useCanvas = defineStore("canvas", {
       canvas.width = imgWidth;
       canvas.height = imgHeight;
       ctx.drawImage(imgEl, 0, 0);
-
-      ctx.font="20px Georgia";
-      ctx.fillText("Hello World!",10,50);
+      // 文字基础样式
+      ctx.textBaseline = "bottom";
+      ctx.textAlign = "center";
+      ctx.font = "bold 30px sans-serif";
+      // 文字填充样式
+      ctx.fillStyle = "#fff";
+      ctx.fillText(text, imgWidth / 2, imgHeight);
+      // 文字轮廓样式
+      ctx.strokeStyle = "#000";
+      ctx.strokeText(text, imgWidth / 2, imgHeight);
 
       return canvas.toDataURL();
     },

@@ -36,7 +36,6 @@ async function handleUploadGif({ raw }: { raw: File }) {
   blobUrlArr = await ffmpegStore.getGifFrames(raw);
   imgSrc.value = blobUrlArr[0] || "";
   sliderMax.value = blobUrlArr.length - 1;
-  console.log(imgSrc);
 }
 function handleSliderChange(val: number): void {
   imgSrc.value = blobUrlArr[val];
@@ -52,7 +51,8 @@ async function handleGenerate() {
       )
     );
   }
-  imgSrc.value = base64Arr[base64Arr.length - 1];
+  const blobUrl = await ffmpegStore.generateGifFromFrames(base64Arr, fileInfoObj);
+  imgSrc.value = blobUrl;
   console.log('generated!');
 }
 

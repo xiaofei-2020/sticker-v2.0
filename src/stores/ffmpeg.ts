@@ -3,7 +3,7 @@ import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
 
 const noop = () => {};
 
-const ffmpeg = createFFmpeg();
+const ffmpeg = createFFmpeg({ corePath: "/ffmpeg-core.js" });
 export const useFFmpeg = defineStore("ffmpeg", {
   state: () => {
     return {
@@ -19,7 +19,7 @@ export const useFFmpeg = defineStore("ffmpeg", {
     async load() {
       if (!ffmpeg.isLoaded()) {
         await ffmpeg.load();
-        console.log('ffmpeg loaded');
+        console.log("ffmpeg loaded");
       }
     },
     async getFileInfo(file: File): Promise<fileInfo> {
@@ -63,14 +63,35 @@ export const useFFmpeg = defineStore("ffmpeg", {
             "readFile",
             `${filename.slice(0, -4)}image${i}.png`
           );
-          base64Arr.push(
-            URL.createObjectURL(new Blob([data.buffer], { type: "video/mp4" }))
-          );
+          base64Arr.push(URL.createObjectURL(new Blob([data.buffer])));
         } catch (e) {
           break;
         }
       }
       return base64Arr;
+    },
+    async generateGifFromFrames(
+      urlList: string[],
+      fileInfo: fileInfo
+    ): Promise<string> {
+      const filename = fileInfo.filename.slice(0, -4);
+      const fps = fileInfo.fps;
+      for (let i = 0, length = urlList.length; i < length; i++) {
+        ffmpeg.FS(
+          "writeFile",
+          `${filename}-image${i + 1}.png`,
+          await fetchFile(urlList[i])
+        );
+      }
+      await ffmpeg.run(
+        "-r",
+        fps.toString(),
+        "-i",
+        `${filename}-image%d.png`,
+        `${filename}-gen.gif`
+      );
+      const data = ffmpeg.FS("readFile", `${filename}-gen.gif`);
+      return URL.createObjectURL(new Blob([data.buffer]));
     },
   },
 });
