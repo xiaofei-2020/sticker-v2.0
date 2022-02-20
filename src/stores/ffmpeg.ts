@@ -1,12 +1,6 @@
 import { defineStore } from "pinia";
 import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
 
-type fileInfo = {
-  filename: string;
-  width: number;
-  height: number;
-  fps: number;
-};
 const noop = () => {};
 
 const ffmpeg = createFFmpeg();
