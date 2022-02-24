@@ -2,6 +2,9 @@
 
 > 本项目仅供个人学习使用
 
+V1.0版本线上演示：https://qcjdye.app.cloudendpoint.cn/
+V2.0版本线上演示：https://qczn18.app.cloudendpoint.cn/
+
 ## 快速开始
 
 ​	安装依赖：
@@ -14,6 +17,11 @@ npm install
 
 ```sh
 npm run dev
+```
+
+打包构建
+```sh
+npm run build
 ```
 
 ## 技术架构
