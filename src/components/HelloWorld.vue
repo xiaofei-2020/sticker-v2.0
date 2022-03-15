@@ -18,7 +18,9 @@ let fileInfoObj: fileInfo;
 // hooks
 onMounted(
   loadingWrapper(async () => {
+    console.time("ffmpeg load");
     await ffmpegStore.load();
+    console.timeEnd("ffmpeg load");
   })
 );
 
@@ -33,7 +35,9 @@ function createImgEl(url: string): Promise<HTMLImageElement> {
   });
 }
 
-function loadingWrapper<T>(fn: (...args: any[]) => Promise<T>): (...args: any[]) => Promise<T> {
+function loadingWrapper<T>(
+  fn: (...args: any[]) => Promise<T>
+): (...args: any[]) => Promise<T> {
   return async (...args) => {
     const loading = ElLoading.service({
       lock: true,
@@ -48,8 +52,12 @@ function loadingWrapper<T>(fn: (...args: any[]) => Promise<T>): (...args: any[])
 
 // 事件区
 const handleUploadGif = loadingWrapper(async ({ raw }: { raw: File }) => {
+  console.time("ffmpeg getFileInfo");
   fileInfoObj = await ffmpegStore.getFileInfo(raw);
+  console.timeEnd("ffmpeg getFileInfo");
+  console.time("ffmpeg getGifFrames");
   blobUrlArr = await ffmpegStore.getGifFrames(raw);
+  console.timeEnd("ffmpeg getGifFrames");
   imgSrc.value = blobUrlArr[0] || "";
   sliderMax.value = blobUrlArr.length - 1;
 });
@@ -58,6 +66,7 @@ function handleSliderChange(val: number): void {
 }
 const handleGenerate = loadingWrapper(async () => {
   const base64Arr: string[] = [];
+  console.time("canvas composeImageAndText");
   for (let url of blobUrlArr) {
     base64Arr.push(
       await canvasStore.composeImageAndText(
@@ -67,10 +76,13 @@ const handleGenerate = loadingWrapper(async () => {
       )
     );
   }
+  console.timeEnd("canvas composeImageAndText");
+  console.time("ffmpeg generateGifFromFrames");
   const blobUrl = await ffmpegStore.generateGifFromFrames(
     base64Arr,
     fileInfoObj
   );
+  console.timeEnd("ffmpeg generateGifFromFrames");
   imgSrc.value = blobUrl;
   console.log("generated!");
 });
